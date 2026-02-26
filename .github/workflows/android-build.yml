@@ -10,18 +10,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: "temurin"
+          java-version: "17"
 
-      - run: chmod +x ./gradlew || true
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew || true
 
-      - run: ./gradlew :app:assembleDebug
+      - name: Build Debug APK
+        run: ./gradlew :app:assembleDebug
 
-      - uses: actions/upload-artifact@v4
+      - name: List APK outputs (debug)
+        run: |
+          echo "=== APK files found ==="
+          find . -type f -name "*.apk" -print
+          echo "=== Build outputs tree (limited) ==="
+          ls -la
+          if [ -d app ]; then ls -la app; fi
+          if [ -d app/build/outputs ]; then find app/build/outputs -maxdepth 5 -type d -print; fi
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: WEBCCCC-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: WEBCCCC-apk
+          path: |
+            **/app/build/outputs/apk/**/*.apk
+            **/build/outputs/apk/**/*.apk
